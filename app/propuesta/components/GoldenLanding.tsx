@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import GoldenPortada from "./GoldenPortada";
 import GoldenProblema from "./GoldenProblema";
 import GoldenOpciones from "./GoldenOpciones";
 import GoldenAntes from "./GoldenAntes";
-import { GoldenEntregables, GoldenTimeline, GoldenCTA } from "./GoldenSlides";
 import GoldenInversion from "./GoldenInversion";
+import { GoldenEntregables, GoldenTimeline, GoldenCTA } from "./GoldenSlides";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,7 +24,20 @@ const SLIDES = [
 ];
 
 const TOTAL = SLIDES.length;
-const VH_PER_SLIDE = 120;
+// Total scroll distance = (TOTAL - 1) viewports worth of scrolling
+// Each slide gets one full viewport height to scroll through
+const VH_PER_SLIDE = 100;
+
+const LABELS = [
+  "01 · Portada",
+  "02 · El problema",
+  "03 · Las opciones",
+  "04 · Antes / Después",
+  "05 · Entregables",
+  "06 · Timeline",
+  "07 · Inversión",
+  "08 · Confirmar",
+];
 
 export default function GoldenLanding() {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -33,19 +46,15 @@ export default function GoldenLanding() {
   const progressRef = useRef<HTMLDivElement>(null);
   const dotRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const labelRef = useRef<HTMLSpanElement>(null);
-
-  const LABELS = [
-    "01 · Portada",
-    "02 · El problema",
-    "03 · Las opciones",
-    "04 · Antes / Después",
-    "05 · Entregables",
-    "06 · Timeline",
-    "07 · Inversión",
-    "08 · Confirmar",
-  ];
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     let ctx: gsap.Context;
 
     const init = () => {
@@ -65,8 +74,12 @@ export default function GoldenLanding() {
         animateSlide(slides[0] as HTMLElement);
         animatedSlides.current.add(0);
 
-        const totalDist = (TOTAL - 1) * window.innerWidth;
-        const scrollLen = TOTAL * VH_PER_SLIDE * (window.innerHeight / 100);
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const totalDist = (TOTAL - 1) * vw;
+        // scroll space = TOTAL viewports, but we only need TOTAL-1 to scroll through
+        // end = total scroll space minus one viewport (the last one stays visible)
+        const scrollEnd = (TOTAL - 1) * vh;
 
         gsap.to(track, {
           x: -totalDist,
@@ -74,9 +87,9 @@ export default function GoldenLanding() {
           scrollTrigger: {
             trigger: wrapperRef.current,
             pin: false,
-            scrub: 1,
+            scrub: 0.8,
             start: "top top",
-            end: `+=${scrollLen}`,
+            end: `+=${scrollEnd}`,
             invalidateOnRefresh: true,
             onUpdate(self) {
               const idx = Math.min(
@@ -84,18 +97,15 @@ export default function GoldenLanding() {
                 TOTAL - 1
               );
 
-              // animate slide when first seen
               if (!animatedSlides.current.has(idx)) {
                 animatedSlides.current.add(idx);
                 animateSlide(slides[idx] as HTMLElement);
               }
 
-              // progress bar
               if (progressRef.current) {
                 progressRef.current.style.transform = `scaleX(${self.progress})`;
               }
 
-              // dots + label
               dotRefs.current.forEach((dot, i) => {
                 if (!dot) return;
                 dot.style.background =
@@ -103,6 +113,7 @@ export default function GoldenLanding() {
                 dot.style.width = i === idx ? "20px" : "6px";
                 dot.style.opacity = i === idx ? "1" : "0.5";
               });
+
               if (labelRef.current) labelRef.current.textContent = LABELS[idx];
             },
           },
@@ -117,7 +128,13 @@ export default function GoldenLanding() {
       ctx?.revert();
       animatedSlides.current.clear();
     };
-  }, []);
+  }, [mounted]);
+
+  // Total height of the wrapper = TOTAL viewports
+  // This gives exactly one full viewport per slide to scroll through
+  const wrapperHeight = mounted
+    ? `${TOTAL * window.innerHeight}px`
+    : `${TOTAL * 100}vh`;
 
   return (
     <>
@@ -127,7 +144,7 @@ export default function GoldenLanding() {
         style={{
           top: 0,
           height: "44px",
-          background: "rgba(26,26,26,0.95)",
+          background: "rgba(26,26,26,0.96)",
           backdropFilter: "blur(14px)",
           borderBottom: "0.5px solid rgba(255,255,255,0.07)",
         }}
@@ -167,7 +184,6 @@ export default function GoldenLanding() {
           </span>
         </div>
 
-        {/* Dots */}
         <div className="flex items-center gap-1.5">
           {LABELS.map((_, i) => (
             <span
@@ -244,10 +260,10 @@ export default function GoldenLanding() {
         </svg>
       </div>
 
-      {/* ── WRAPPER with total scroll height ── */}
+      {/* ── WRAPPER: total scroll height = TOTAL viewports ── */}
       <div
         ref={wrapperRef}
-        style={{ height: `${TOTAL * VH_PER_SLIDE}vh`, marginTop: "45px" }}
+        style={{ height: wrapperHeight, marginTop: "45px" }}
       >
         <div
           className="sticky overflow-hidden"

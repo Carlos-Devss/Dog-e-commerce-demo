@@ -27,9 +27,8 @@ export default function PropuestaLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    <html lang="es" className={`${playfair.variable} ${dmSans.variable}`}>
       <body
-        className={`${playfair.variable} ${dmSans.variable} antialiased`}
         style={{
           margin: 0,
           padding: 0,
