@@ -220,7 +220,7 @@ export default function CartDrawer() {
                     className="h-full rounded-full bg-gold"
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPct}%` }}
-                    transition={{ duration: 0.6, ease: "power2.out" }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
                   />
                 </div>
               </div>

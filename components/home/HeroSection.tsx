@@ -66,17 +66,13 @@ export default function HeroSection() {
   }, []);
 
   const next = useCallback(() => {
-    setCurrent((prev) => {
-      setDirection(1);
-      return (prev + 1) % SLIDES.length;
-    });
+    setDirection(1);
+    setCurrent((prev) => (prev + 1) % SLIDES.length);
   }, []);
 
   const prev = useCallback(() => {
-    setCurrent((prev) => {
-      setDirection(-1);
-      return (prev - 1 + SLIDES.length) % SLIDES.length;
-    });
+    setDirection(-1);
+    setCurrent((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
   }, []);
 
   useEffect(() => {
@@ -103,38 +99,16 @@ export default function HeroSection() {
 
   const slide = SLIDES[current];
 
-  const imageVariants = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? "100%" : "-100%",
-      scale: 1.05,
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      scale: 1,
-      opacity: 1,
-      transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
-    },
-    exit: (dir: number) => ({
-      x: dir > 0 ? "-30%" : "30%",
-      scale: 0.98,
-      opacity: 0,
-      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-    }),
+  const imgInitial = {
+    x: direction > 0 ? "100%" : "-100%",
+    scale: 1.05 as number,
+    opacity: 0 as number,
   };
-
-  const textVariants = {
-    enter: { opacity: 0, y: 32 },
-    center: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.65, delay: 0.25, ease: [0.22, 1, 0.36, 1] },
-    },
-    exit: {
-      opacity: 0,
-      y: -16,
-      transition: { duration: 0.3 },
-    },
+  const imgAnimate = { x: "0%", scale: 1 as number, opacity: 1 as number };
+  const imgExit = {
+    x: direction > 0 ? "-30%" : "30%",
+    scale: 0.98 as number,
+    opacity: 0 as number,
   };
 
   return (
@@ -143,15 +117,13 @@ export default function HeroSection() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* SLIDES — images */}
-      <AnimatePresence initial={false} custom={direction} mode="sync">
+      <AnimatePresence initial={false} mode="sync">
         <motion.div
           key={`img-${slide.id}`}
-          custom={direction}
-          variants={imageVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
+          initial={imgInitial}
+          animate={imgAnimate}
+          exit={imgExit}
+          transition={{ duration: 0.85, ease: "easeOut" }}
           className="absolute inset-0 z-0"
         >
           <Image
@@ -162,17 +134,13 @@ export default function HeroSection() {
             sizes="100vw"
             className="object-cover object-center"
           />
-          {/* Dark overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-r from-ink/92 via-ink/65 to-ink/25" />
-          {/* Bottom fade */}
           <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-ink/85 to-transparent" />
         </motion.div>
       </AnimatePresence>
 
-      {/* CONTENT */}
       <div className="relative z-10 min-h-screen flex flex-col justify-between px-8 lg:px-20 pt-28 pb-10">
         <div className="flex-1 flex flex-col justify-center max-w-2xl">
-          {/* Slide badge */}
           <AnimatePresence mode="wait">
             <motion.div
               key={`badge-${slide.id}`}
@@ -199,14 +167,13 @@ export default function HeroSection() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Headline */}
           <AnimatePresence mode="wait">
             <motion.div
               key={`text-${slide.id}`}
-              variants={textVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.65, delay: 0.2, ease: "easeOut" }}
             >
               <h1 className="font-display font-black text-5xl lg:text-6xl xl:text-7xl leading-[1.02] tracking-tight text-white mb-4">
                 {slide.headline}
@@ -233,11 +200,9 @@ export default function HeroSection() {
                   </svg>
                 </span>
               </h1>
-
               <p className="text-white/60 text-lg font-light leading-relaxed max-w-lg mt-6 mb-10">
                 {slide.sub}
               </p>
-
               <div className="flex flex-wrap gap-3">
                 <a
                   href={slide.ctaHref}
@@ -260,9 +225,7 @@ export default function HeroSection() {
           </AnimatePresence>
         </div>
 
-        {/* BOTTOM BAR */}
         <div className="flex flex-col lg:flex-row items-end lg:items-center justify-between gap-6 pt-8 border-t border-white/8">
-          {/* Stats */}
           <div ref={statsRef} className="flex gap-8">
             {STATS.map((stat, i) => (
               <div
@@ -281,7 +244,6 @@ export default function HeroSection() {
             ))}
           </div>
 
-          {/* Slider controls */}
           <div className="flex items-center gap-4">
             <button
               onClick={prev}
@@ -302,7 +264,6 @@ export default function HeroSection() {
               </svg>
             </button>
 
-            {/* Progress dots */}
             <div className="flex gap-2 items-center">
               {SLIDES.map((s, i) => (
                 <button
@@ -356,7 +317,6 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
