@@ -7,6 +7,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { PRODUCTS } from "../../../data/product";
 import { useCartStore } from "@/store/cartStore";
+import { IProduct } from "@/types/product";
 
 const BENEFITS = [
   {
@@ -111,11 +112,9 @@ function formatPrice(price: number) {
   }).format(price);
 }
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
-  const product = PRODUCTS.find((p) => p.slug === params.slug);
+// ── Inner component receives a typed product — no undefined ──────────────────
 
-  if (!product) notFound();
-
+function ProductDetail({ product }: { product: IProduct }) {
   const [activeImg, setActiveImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
@@ -192,7 +191,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           {/* LEFT — Gallery */}
           <div ref={galleryRef}>
-            {/* Main image */}
             <div className="relative aspect-square rounded-3xl overflow-hidden bg-warm-2 mb-4">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -245,7 +243,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               </button>
             </div>
 
-            {/* Thumbnails */}
             <div className="grid grid-cols-4 gap-3">
               {gallery.map((img, i) => (
                 <button
@@ -283,7 +280,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               </h1>
             </div>
 
-            {/* Rating */}
             <div className="info-line flex items-center gap-2 mb-5">
               <div className="flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -306,7 +302,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               </span>
             </div>
 
-            {/* Price */}
             <div className="info-line flex items-baseline gap-3 mb-6 pb-6 border-b border-warm-3">
               <span className="font-display font-black text-4xl text-ink">
                 {formatPrice(product.price)}
@@ -324,14 +319,12 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               )}
             </div>
 
-            {/* Description */}
             <div className="info-line mb-6">
               <p className="text-muted font-light text-base leading-relaxed">
                 {product.shortDesc}
               </p>
             </div>
 
-            {/* Quantity + Add to cart */}
             <div className="info-line flex flex-col sm:flex-row gap-3 mb-6">
               <div className="flex items-center gap-0 bg-warm-2 rounded-xl border border-warm-3 overflow-hidden">
                 <button
@@ -411,7 +404,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               </button>
             </div>
 
-            {/* Shipping note */}
             <div className="info-line flex items-center gap-2 text-xs text-muted font-light mb-8 pb-8 border-b border-warm-3">
               <svg
                 width="14"
@@ -431,7 +423,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               Envío gratis en pedidos +$799 · Entrega en 48h a todo México
             </div>
 
-            {/* Benefits */}
             <div className="info-line grid grid-cols-2 gap-4">
               {BENEFITS.map((b) => (
                 <div key={b.title} className="flex items-start gap-3">
@@ -452,7 +443,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
           </div>
         </div>
 
-        {/* RELATED PRODUCTS */}
+        {/* RELATED */}
         {related.length > 0 && (
           <div className="mt-24">
             <div className="flex items-end justify-between mb-8">
@@ -471,7 +462,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 Ver todos →
               </a>
             </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               {related.map((p, i) => (
                 <motion.a
@@ -511,4 +501,12 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
       </div>
     </main>
   );
+}
+
+// ── Page — find product then pass typed to ProductDetail ──────────────────────
+
+export default function ProductPage({ params }: { params: { slug: string } }) {
+  const product = PRODUCTS.find((p) => p.slug === params.slug);
+  if (!product) notFound();
+  return <ProductDetail product={product} />;
 }
