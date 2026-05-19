@@ -594,7 +594,7 @@ export default function CatalogoPage() {
                           href={`/producto/${product.slug}`}
                           className="text-xs font-semibold text-muted hover:text-ink transition-colors duration-200 px-3 py-2 rounded-xl border border-warm-3 hover:border-ink/20"
                         >
-                          Ver detalles
+                          Ver detalle
                         </a>
                         <button
                           onClick={() => handleAddToCart(product)}
